@@ -1,0 +1,36 @@
+{
+  "name": "exmano",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/lib/index.js",
+  "types": "./dist/lib/main.d.ts",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "tsup --dts"
+  },
+  "autors": [
+    {
+      "name": "Marcin Czaniecki",
+      "email": "marcinczaniecki97@gmail.com",
+      "url": "https://github.com/janossik"
+    }
+  ],
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.4.1",
+    "@types/ws": "^8.5.5",
+    "@typescript-eslint/eslint-plugin": "^5.61.0",
+    "@typescript-eslint/parser": "^5.61.0",
+    "eslint": "^8.44.0",
+    "eslint-plugin-prettier": "^5.0.0-alpha.2",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.0",
+    "ts-node": "^10.9.1",
+    "tsup": "^7.1.0",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "path-to-regexp": "^6.2.1",
+    "ws": "^8.13.0"
+  }
+}

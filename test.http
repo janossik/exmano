@@ -1,0 +1,14 @@
+
+### Send POST request with json body
+POST http://localhost:3000/post
+Content-Type: application/json
+Cookie: name=value; name2=value2
+
+{
+  "id": 999,
+  "value": "content"
+}
+
+### Send WS request
+WEBSOCKET ws://localhost:3000/test
+Content-Type: application/json
