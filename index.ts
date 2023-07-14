@@ -1,5 +1,7 @@
-import { Appltication, Server } from './src/Application';
+import { Appltication } from './src/Application';
+import { Server } from './src/Server';
 
+export * from './src/Server';
 export * from './src/Application';
 export * from './src/Request';
 export * from './src/Response';

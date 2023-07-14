@@ -1,22 +1,16 @@
 import { EventEmitter } from 'events';
 import * as http from 'http';
 import * as https from 'https';
+import * as path from 'path';
 import { Key, pathToRegexp } from 'path-to-regexp';
 import { Request } from './Request';
 import { Response } from './Response';
 import { Handler } from './types';
+import { Router } from './Router';
+import { Server } from './Server';
 
 export interface ApplticationOptions {
   useErrorHandler?: boolean;
-}
-
-export class Server extends http.Server<typeof Request<Record<string, unknown>>, typeof Response> {
-  constructor(options: http.ServerOptions<typeof Request<Record<string, unknown>>, typeof Response>) {
-    super(options);
-    this.on('request', async (request: Request, response: Response) => {
-      this.emit(request.method, request, response);
-    });
-  }
 }
 
 export class Appltication extends EventEmitter {
@@ -24,7 +18,7 @@ export class Appltication extends EventEmitter {
   middlewares: Array<Handler> = [];
   routers: Record<string, { method: string; path: string; regexp: RegExp; keys: Key[]; handlers: Set<Handler> }> = {};
   options: ApplticationOptions;
-  errorHandler = async (err: unknown, request: Request, response: Response) => {
+  errorHandler = async (err: unknown, request: Request, response: Response): Promise<unknown> => {
     console.error(err);
 
     if (err instanceof Error) {
@@ -36,6 +30,7 @@ export class Appltication extends EventEmitter {
 
     response.status(500).json({ message: 'Internal Server Error', error: err });
   };
+
   constructor(server?: Server | null, options?: ApplticationOptions) {
     super();
     this.options = options || { useErrorHandler: true };
@@ -45,7 +40,13 @@ export class Appltication extends EventEmitter {
 
   request(method: string, pathname: string, ...handlers: Handler[]) {
     const keys: Key[] = [];
-    this.routers[pathname] = { method, path: pathname, regexp: pathToRegexp(pathname), keys, handlers: new Set([...this.middlewares, ...handlers]) };
+    this.routers[pathname] = {
+      method,
+      path: pathname.endsWith('/') ? pathname.slice(0, -1) : pathname,
+      regexp: pathToRegexp(pathname.endsWith('/') ? pathname.slice(0, -1) : pathname),
+      keys,
+      handlers: new Set([...this.middlewares, ...handlers]),
+    };
   }
   get(pathname: string, ...handlers: Handler[]) {
     this.request('GET', pathname, ...handlers);
@@ -60,10 +61,47 @@ export class Appltication extends EventEmitter {
     this.request('DELETE', pathname, ...handlers);
   }
 
-  use(middleware: Handler) {
-    this.middlewares.push(middleware);
+  addRouter(pathname: string, router: Router): void;
+  addRouter(router: Router): void;
+  addRouter(arg1: string | Router, arg2?: Router) {
+    let normalizedPathname: string;
+    let router: Router;
+
+    if (typeof arg1 === 'string') {
+      normalizedPathname = arg1;
+      router = arg2!;
+    } else {
+      normalizedPathname = '';
+      router = arg1;
+    }
+
+    for (const currentRouter of Object.values(router.routers)) {
+      currentRouter.path = path.normalize(normalizedPathname + router.pathname + currentRouter.path);
+
+      currentRouter.path = currentRouter.path.endsWith('/') ? currentRouter.path.slice(0, -1) : currentRouter.path;
+
+      currentRouter.regexp = pathToRegexp(currentRouter.path, currentRouter.keys);
+      currentRouter.handlers = new Set([...this.middlewares, ...currentRouter.handlers]);
+
+      this.routers[currentRouter.path] = currentRouter;
+    }
+  }
+
+  use(pathname: string, router: Router): void;
+  use(router: Router): void;
+  use(middleware: Handler): void;
+  use(arg1: string | Router | Handler, arg2?: Router) {
+    if (typeof arg1 === 'string') {
+      if (arg2 === undefined) throw new Error('Invalid arguments');
+      return this.addRouter(arg1, arg2!);
+    }
+    if (arg1 instanceof Router) {
+      return this.addRouter(arg1);
+    }
+
+    this.middlewares.push(arg1);
     for (const router of Object.values(this.routers)) {
-      router.handlers.add(middleware);
+      router.handlers.add(arg1);
     }
   }
 
@@ -81,6 +119,7 @@ export class Appltication extends EventEmitter {
       for (const { regexp, method, handlers } of Object.values(this.routers)) {
         if (request.method !== method || regexp.exec(request.url!) === null) continue;
         const handValues = handlers.values();
+
         const next = async (err?: unknown) => {
           if (err) {
             if (!this.options.useErrorHandler) throw err;
@@ -96,7 +135,9 @@ export class Appltication extends EventEmitter {
 
         return handValues.next().value(request, response, next);
       }
-      response.status(404).json({ message: `Method '${request.method}' for path '${request.url}' isn't exist` });
+      const error = new Error(`Method '${request.method}' for path '${request.url}' isn't exist`);
+      if (!this.options.useErrorHandler) throw error;
+      return this.errorHandler(error, request, response);
     });
   }
 }
