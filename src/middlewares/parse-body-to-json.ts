@@ -9,7 +9,9 @@ export async function parseBodyToJson(request: Request, response: Response, next
       request.on('error', reject);
       request.on('data', (chunk: Buffer) => chunks.push(chunk));
       request.on('end', () => {
-        request.body = JSON.parse(Buffer.concat(chunks).toString());
+        if (Buffer.concat(chunks).toString().length) {
+          request.body = JSON.parse(Buffer.concat(chunks).toString());
+        }
         resolve(request.body);
       });
     });
