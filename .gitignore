@@ -3,3 +3,4 @@ lib
 dist
 build
 .idea
+examples/package-lock.json

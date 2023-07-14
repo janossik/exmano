@@ -8,6 +8,7 @@
     "lib"
   ],
   "scripts": {
+    "predev": "npm run build && cd ./examples && npm i && cd ..",
     "dev": "nodemon",
     "build": "tsup --dts",
     "prepublish": "npm run build"
