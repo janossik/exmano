@@ -3,9 +3,9 @@
     "module": "CommonJS",
     "target": "ES2015",
     "declaration": true,
-    "lib": ["ES2021"],
+    "lib": ["ES2017", "ES7", "ES6", "ES2021"],
     "moduleResolution": "node",
-    "outDir": "./build/lib",
+    "outDir": "./dist",
     "rootDir": ".",
     "declarationMap": true,
     "strict": true,
@@ -14,6 +14,7 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [
+    "index.ts",
     "src/**/*",
     "*.ts"
   ],

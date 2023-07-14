@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: [
-    'src/index.ts',
+    'index.ts',
     'src/Application.ts',
     'src/Request.ts',
     'src/Response.ts',
@@ -13,4 +13,5 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
+  outDir: 'lib',
 });
