@@ -2,8 +2,8 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: ['index.ts', 'src/**/*.ts'],
-  splitting: false,
-  sourcemap: true,
+  splitting: true,
+  sourcemap: false,
   clean: true,
   outDir: 'lib',
 });
