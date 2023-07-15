@@ -1,35 +1,18 @@
-import { EventEmitter } from 'events';
 import * as http from 'http';
 import * as https from 'https';
-import * as path from 'path';
-import { Key, pathToRegexp } from 'path-to-regexp';
 import { Request } from './Request';
 import { Response } from './Response';
-import { Handler } from './types';
-import { Router } from './Router';
-import { Server } from './Server';
+import { Server, ServerHttps } from './Server';
+import { ApplticationRouter, ApplticationOptions, ErrorHandler } from './types';
+import { NextFunctionFactory } from './utils/next-function-factory';
+import { defaultErrorHandler } from './utils/default-error-handler';
+import { ManagerRequestEmitter } from './Manage-request-emitter';
 
-export interface ApplticationOptions {
-  useErrorHandler?: boolean;
-}
-
-export class Appltication extends EventEmitter {
-  server: Server | http.Server | https.Server;
-  middlewares: Array<Handler> = [];
-  routers: Record<string, { method: string; path: string; regexp: RegExp; keys: Key[]; handlers: Set<Handler> }> = {};
+export class Appltication extends ManagerRequestEmitter {
+  server: Server | ServerHttps | http.Server | https.Server;
+  routers: Record<string, ApplticationRouter> = {};
   options: ApplticationOptions;
-  errorHandler = async (err: unknown, request: Request, response: Response): Promise<unknown> => {
-    console.error(err);
-
-    if (err instanceof Error) {
-      if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-        return response.status(500).json({ message: 'Internal Server Error', details: err.stack?.split('\n') });
-      }
-      return response.status(500).json({ message: 'Internal Server Error', error: err.message });
-    }
-
-    response.status(500).json({ message: 'Internal Server Error', error: err });
-  };
+  private _errorHandler: ErrorHandler = defaultErrorHandler;
 
   constructor(server?: Server | null, options?: ApplticationOptions) {
     super();
@@ -38,75 +21,14 @@ export class Appltication extends EventEmitter {
     this.init();
   }
 
-  request(method: string, pathname: string, ...handlers: Handler[]) {
-    const keys: Key[] = [];
-    this.routers[pathname] = {
-      method,
-      path: pathname.endsWith('/') ? pathname.slice(0, -1) : pathname,
-      regexp: pathToRegexp(pathname.endsWith('/') ? pathname.slice(0, -1) : pathname),
-      keys,
-      handlers: new Set([...this.middlewares, ...handlers]),
-    };
-  }
-  get(pathname: string, ...handlers: Handler[]) {
-    this.request('GET', pathname, ...handlers);
-  }
-  post(pathname: string, ...handlers: Handler[]) {
-    this.request('POST', pathname, ...handlers);
-  }
-  put(pathname: string, ...handlers: Handler[]) {
-    this.request('PUT', pathname, ...handlers);
-  }
-  delete(pathname: string, ...handlers: Handler[]) {
-    this.request('DELETE', pathname, ...handlers);
-  }
-
-  addRouter(pathname: string, router: Router): void;
-  addRouter(router: Router): void;
-  addRouter(arg1: string | Router, arg2?: Router) {
-    let normalizedPathname: string;
-    let router: Router;
-
-    if (typeof arg1 === 'string') {
-      normalizedPathname = arg1;
-      router = arg2!;
-    } else {
-      normalizedPathname = '';
-      router = arg1;
-    }
-
-    for (const currentRouter of Object.values(router.routers)) {
-      currentRouter.path = path.normalize(normalizedPathname + router.pathname + currentRouter.path);
-
-      currentRouter.path = currentRouter.path.endsWith('/') ? currentRouter.path.slice(0, -1) : currentRouter.path;
-
-      currentRouter.regexp = pathToRegexp(currentRouter.path, currentRouter.keys);
-      currentRouter.handlers = new Set([...this.middlewares, ...currentRouter.handlers]);
-
-      this.routers[currentRouter.path] = currentRouter;
-    }
-  }
-
-  use(pathname: string, router: Router): void;
-  use(router: Router): void;
-  use(middleware: Handler): void;
-  use(arg1: string | Router | Handler, arg2?: Router) {
-    if (typeof arg1 === 'string') {
-      if (arg2 === undefined) throw new Error('Invalid arguments');
-      return this.addRouter(arg1, arg2!);
-    }
-    if (arg1 instanceof Router) {
-      return this.addRouter(arg1);
-    }
-
-    this.middlewares.push(arg1);
-    for (const router of Object.values(this.routers)) {
-      router.handlers.add(arg1);
-    }
+  errorHandler(handler: ErrorHandler) {
+    this._errorHandler = handler;
+    return this;
   }
 
   listen(port: number, hostname: string, callback?: () => void) {
     this.server.listen(port, hostname, callback);
+    return this;
   }
 
   private init() {
@@ -116,28 +38,20 @@ export class Appltication extends EventEmitter {
       this.emit('request', request, response);
     });
     this.on('request', async (request: Request, response: Response) => {
-      for (const { regexp, method, handlers } of Object.values(this.routers)) {
+      response.setHeader('X-Powered-By', 'Exmano');
+      for (const { regexp, method, handlers, match } of Object.values(this.routers)) {
         if (request.method !== method || regexp.exec(request.url!) === null) continue;
         const handValues = handlers.values();
-
-        const next = async (err?: unknown) => {
-          if (err) {
-            if (!this.options.useErrorHandler) throw err;
-            return await this.errorHandler(err, request, response);
-          }
-          try {
-            await handValues.next().value(request, response, next);
-          } catch (err) {
-            if (!this.options.useErrorHandler) throw err;
-            await this.errorHandler(err, request, response);
-          }
-        };
-
+        const matchedInfo = match(request.url!);
+        if (matchedInfo) {
+          request.params = matchedInfo.params as Record<string, string>;
+        }
+        const next = NextFunctionFactory(handValues, request, response, this.options.useErrorHandler, this._errorHandler);
         return handValues.next().value(request, response, next);
       }
       const error = new Error(`Method '${request.method}' for path '${request.url}' isn't exist`);
       if (!this.options.useErrorHandler) throw error;
-      return this.errorHandler(error, request, response);
+      return this._errorHandler(error, request, response);
     });
   }
 }
