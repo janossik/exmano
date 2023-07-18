@@ -62,24 +62,22 @@ export class Appltication extends Router {
         if (info) {
           request.params = info.params as Record<string, string>;
         }
-        const handlers = list.values();
-        let handler = handlers.next();
+
+        let node = list.head;
         const next = async (err?: unknown) => {
           if (err) {
             if (!this.options.useErrorHandler) throw err;
             return await this._errorHandler(err, request, response);
           }
           try {
-            handler = handlers.next();
-            console.log(handler.value?.toString());
-            handler.value && handler.value(request, response, next);
+            node = node?.next || null;
+            node?.handler(request, response, next);
           } catch (err) {
             if (!this.options.useErrorHandler) throw err;
             return await this._errorHandler(err, request, response);
           }
         };
-        console.log(handler.value?.toString());
-        return handler.value && handler.value(request, response, next);
+        return node && node.handler(request, response, next);
       }
       const error = new Error(`Method '${request.method}' for path '${request.url}' isn't exist`);
       if (!this.options.useErrorHandler) throw error;
