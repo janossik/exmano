@@ -16,7 +16,8 @@ export async function parseBodyToJson(request: Request, response: Response, next
       });
     });
   };
-  await parse();
-  console.log('!', next.toString());
-  await next();
+  parse()
+    .then(() => next())
+    .catch(next)
+    .finally(() => next());
 }
