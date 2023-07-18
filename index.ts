@@ -12,7 +12,7 @@ export * from './src/Router';
 export * from './src/middlewares/parse-cookies';
 export * from './src/middlewares/parse-body-to-json';
 
-export default function exmano(server?: Server | null) {
+export default function exmano(server?: Server) {
   const app = new Appltication(server);
   app.use(parseBodyToJson);
   app.use(parseCookies);

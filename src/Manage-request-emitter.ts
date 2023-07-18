@@ -40,13 +40,13 @@ export abstract class ManagerRequestEmitter extends EventEmitter {
     }
 
     for (const currentRouter of Object.values(router.routers)) {
-      currentRouter.path = preparePathname(normalizedPathname, router.pathname, currentRouter.path);
+      currentRouter.pathname = preparePathname(normalizedPathname, router.pathname, currentRouter.pathname);
 
-      currentRouter.regexp = pathToRegexp(currentRouter.path, currentRouter.keys);
-      currentRouter.match = match(currentRouter.path, { decode: decodeURIComponent });
+      currentRouter.regexp = pathToRegexp(currentRouter.pathname);
+      currentRouter.match = match(currentRouter.pathname, { decode: decodeURIComponent });
       currentRouter.handlers = new Set([...this.middlewares, ...currentRouter.handlers]);
 
-      this.routers[currentRouter.path] = currentRouter;
+      this.routers[currentRouter.pathname] = currentRouter;
     }
     return this;
   }

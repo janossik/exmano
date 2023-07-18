@@ -6,4 +6,5 @@ export default defineConfig({
   sourcemap: false,
   clean: true,
   outDir: 'lib',
+  target: 'node14',
 });

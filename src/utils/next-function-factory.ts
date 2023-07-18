@@ -3,7 +3,7 @@ import { Request } from '../Request';
 import { Response } from '../Response';
 
 export function NextFunctionFactory(
-  handlers: IterableIterator<Handler<Error>>,
+  handlers: IterableIterator<Handler>,
   request: Request,
   response: Response,
   useErrorHandler?: boolean,

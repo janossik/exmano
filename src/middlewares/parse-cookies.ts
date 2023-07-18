@@ -24,5 +24,6 @@ export async function parseCookies(request: Request, response: Response, next: N
   }
 
   request.cookies = cookies;
+  console.log('!!', next);
   await next();
 }

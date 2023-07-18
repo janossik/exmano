@@ -2,9 +2,7 @@ import exmano, { parseBodyToJson, Router } from 'exmano';
 
 const app = exmano();
 
-console.log(app.errorHandler);
-
-app.use(parseBodyToJson);
+//app.use(parseBodyToJson);
 
 app.get('/zzz/', (req, res) => {
   res.json({ message: 'Hello World!' });
@@ -21,7 +19,7 @@ router2.post('/:id', (req, res) => {
 router.use(router2);
 app.use(router);
 
-console.log(app);
+console.log(app.routers);
 
 app.listen(3000, '0.0.0.0', () => {
   console.log('Example app listening on port 3000!');
