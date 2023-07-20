@@ -1,26 +1,25 @@
-import exmano, { parseBodyToJson, Router } from 'exmano';
+import exmano, { Router } from 'exmano';
 
 const app = exmano();
 
-//app.use(parseBodyToJson);
+const router = new Router('/1');
+const router2 = new Router('/3');
+const router3 = new Router('/3');
 
-app.get('/zzz/', (req, res) => {
-  res.json({ message: 'Hello World!' });
-});
+router2.post('/4', (request, response) => {});
+router3.post('/', (request, response) => {});
+router.use('/2/', router2);
+router.use('/2', router3);
 
-const router = new Router('/test');
-
-const router2 = new Router('/test2');
-
-router2.post('/:id', (req, res) => {
-  res.json({ message: 'Hello World! 2', body: req.body });
-});
-
-router.use(router2);
+app.get('/1/2/3/4', (request, response) => {});
 app.use(router);
+
+app.get('/', (request, response) => {
+  response.send('Hello World');
+});
 
 console.log(app.routers);
 
-app.listen(3000, '0.0.0.0', () => {
-  console.log('Example app listening on port 3000!');
+app.listen(3000, () => {
+  console.log(`Server is running on http://localhost:3000`);
 });

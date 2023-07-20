@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "predev": "npm run build && cd ./examples && npm i && cd ..",
+    "predev": "rm -rf examples/node_modules && rm -rf examples/package-lock.json &&npm run build && cd ./examples && npm i && cd ..",
     "dev": "nodemon",
     "build": "tsup --dts",
     "prepublish": "npm run build"
