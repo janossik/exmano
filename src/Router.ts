@@ -6,7 +6,7 @@ import { LinkedList } from './LinkedList';
 
 export class Router extends EventEmitter {
   private _pathname: string;
-  private middlewares: Handler[] = [];
+  readonly middlewares: Handler[] = [];
   readonly routers: Record<string, LinkedList[]> = {};
   private _paths: string[] = [];
   constructor(pathname = '/') {
@@ -21,10 +21,7 @@ export class Router extends EventEmitter {
       const lists = this.routers[key];
       for (const list of lists) {
         list.pathname = preparePathname(pathname, list.pathname);
-        if (this._paths.includes(list.pathname)) {
-          throw new Error(`Pathname ${list.pathname} already exists`);
-        }
-        this._paths.push(list.pathname);
+        this.checkPath(list.method, preparePathname(this.pathname, list.pathname));
         list.regexp = pathToRegexp(preparePathname(pathname, list.pathname));
       }
     }
@@ -78,6 +75,7 @@ export class Router extends EventEmitter {
             throw new Error(`The router was already used, ${key}:${list.pathname}`);
           }
           this.checkPath(list.method, preparePathname(this.pathname, list.pathname));
+          list.prepend(...this.middlewares);
           this.routers[key] && this.routers[key].push(list);
         }
       }
@@ -99,7 +97,7 @@ export class Router extends EventEmitter {
             throw new Error(`The router was already used, ${key}:${list.pathname}`);
           }
           this.checkPath(list.method, preparePathname(this.pathname, arg1, list.pathname));
-
+          list.prepend(...this.middlewares);
           this.routers[key] && this.routers[key].push(list);
         }
       }
