@@ -1,6 +1,6 @@
 {
   "name": "exmano",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "predev": "npm run build && cd ./examples && npm i && cd ..",
+    "predev": "rm -rf examples/node_modules && rm -rf examples/package-lock.json &&npm run build && cd ./examples && npm i && cd ..",
     "dev": "nodemon",
     "build": "tsup --dts",
     "prepublish": "npm run build"
@@ -16,7 +16,7 @@
   "autors": [
     {
       "name": "Marcin Czaniecki",
-      "email": "marcinczaniecki97@gmail.com",
+      "email": "marcinczaniecki97@proton.me",
       "url": "https://github.com/janossik"
     }
   ],
