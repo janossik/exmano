@@ -9,3 +9,12 @@ Content-Type: application/json
   "name": "test",
   "age": 2
 }
+
+###
+WEBSOCKET ws://localhost:3000/test/1
+Sec-WebSocket-Protocol: json
+
+{
+  "name": "test",
+  "age": 2
+}

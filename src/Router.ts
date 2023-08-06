@@ -3,6 +3,7 @@ import { Handler, WebSocketHandler } from './types';
 import { preparePathname } from './utils/prepare-pathname';
 import { pathToRegexp } from 'path-to-regexp';
 import { LinkedList } from './LinkedList';
+import { WebSocketServer } from 'ws';
 
 export class Router extends EventEmitter {
   readonly webSocketMiddlewares: WebSocketHandler[] = [];
@@ -14,6 +15,8 @@ export class Router extends EventEmitter {
     linkedList.prepend(...this.webSocketMiddlewares);
     linkedList.regexp = pathToRegexp(preparePathname(this.pathname, pathname));
     this.webSockets.push(linkedList);
+
+    linkedList.webSocketServer = new WebSocketServer({ noServer: true });
     return this;
   }
 

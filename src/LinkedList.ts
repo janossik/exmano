@@ -1,4 +1,5 @@
 import { match, pathToRegexp } from 'path-to-regexp';
+import { WebSocketServer } from 'ws';
 export class Node<H> {
   next: Node<H> | null = null;
   handler: H;
@@ -13,6 +14,7 @@ export class LinkedList<H> {
   regexp: RegExp;
   head: Node<H> | null = null;
   tail: Node<H> | null = null;
+  webSocketServer: WebSocketServer | null = null;
   constructor(method: string, pathname: string, ...handlers: H[]) {
     this.method = method;
     this.pathname = pathname;

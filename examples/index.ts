@@ -26,6 +26,25 @@ app.get('/', (request, response) => {
   response.send('Hello World');
 });
 
+app.ws(
+  '/test/:id',
+  (ws, req, next) => {
+    ws.send('test');
+    next();
+  },
+  (ws, req, next) => {
+    ws.send('test');
+    next();
+  },
+  (ws, req, next) => {
+    ws.on('message', (message) => {
+      console.log(message.toString());
+    });
+
+    ws.send('test2');
+  },
+);
+
 app.listen(3000, () => {
   console.log(`Server is running on http://localhost:3000`);
 });
