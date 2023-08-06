@@ -1,13 +1,25 @@
 import { EventEmitter } from 'events';
-import { Handler } from './types';
+import { Handler, WebSocketHandler } from './types';
 import { preparePathname } from './utils/prepare-pathname';
 import { pathToRegexp } from 'path-to-regexp';
 import { LinkedList } from './LinkedList';
 
 export class Router extends EventEmitter {
+  readonly webSocketMiddlewares: WebSocketHandler[] = [];
+  readonly webSockets: LinkedList<WebSocketHandler>[] = [];
+  ws(pathname: string, ...handlers: WebSocketHandler[]) {
+    const currentPathname = preparePathname(this.pathname, pathname);
+    this.checkPath('WS', currentPathname);
+    const linkedList = new LinkedList('WS', currentPathname, ...handlers);
+    linkedList.prepend(...this.webSocketMiddlewares);
+    linkedList.regexp = pathToRegexp(preparePathname(this.pathname, pathname));
+    this.webSockets.push(linkedList);
+    return this;
+  }
+
   private _pathname: string;
   readonly middlewares: Handler[] = [];
-  readonly routers: Record<string, LinkedList[]> = {};
+  readonly routers: Record<string, LinkedList<Handler>[]> = {};
   private _paths: string[] = [];
   constructor(pathname = '/') {
     super();
@@ -35,7 +47,7 @@ export class Router extends EventEmitter {
   }
   request(method: string, pathname: string, ...handlers: Handler[]) {
     if (!this.routers[method]) {
-      this.routers[method] = [] as LinkedList[];
+      this.routers[method] = [] as LinkedList<Handler>[];
     }
     const currentPathname = preparePathname(this.pathname, pathname);
     this.checkPath(method, currentPathname);
@@ -61,7 +73,12 @@ export class Router extends EventEmitter {
   use(pathname: string, router: Router): this;
   use(router: Router): this;
   use(...middleware: Handler[]): this;
-  use(arg1: string | Router | Handler, arg2?: Router | Handler, ...args: Handler[]) {
+  use(isWs: '[WS]', ...middleware: WebSocketHandler[]): this;
+  use(arg1: string | Router | Handler, arg2?: Router | Handler | WebSocketHandler, ...args: (Handler | WebSocketHandler)[]) {
+    if (arg1 === '[WS]') {
+      this.webSocketMiddlewares.push(arg2 as WebSocketHandler, ...(args as WebSocketHandler[]));
+      return this;
+    }
     if (arg1 instanceof Router) {
       const router = arg1;
 
@@ -78,6 +95,13 @@ export class Router extends EventEmitter {
           list.prepend(...this.middlewares);
           this.routers[key] && this.routers[key].push(list);
         }
+      }
+      for (const list of this.webSockets) {
+        if (this.webSockets.includes(list)) {
+          throw new Error(`The router was already used, WS:${list.pathname}`);
+        }
+        list.prepend(...this.webSocketMiddlewares);
+        this.webSockets.push(list);
       }
       router.pathname = this.pathname;
       return this;
@@ -100,6 +124,13 @@ export class Router extends EventEmitter {
           list.prepend(...this.middlewares);
           this.routers[key] && this.routers[key].push(list);
         }
+      }
+      for (const list of this.webSockets) {
+        if (this.webSockets.includes(list)) {
+          throw new Error(`The router was already used, WS:${list.pathname}`);
+        }
+        list.prepend(...this.webSocketMiddlewares);
+        this.webSockets.push(list);
       }
       router.pathname = preparePathname(this.pathname, arg1);
       return this;
