@@ -1,26 +1,25 @@
 import { match, pathToRegexp } from 'path-to-regexp';
-import { Handler } from './types';
-export class Node {
-  next: Node | null = null;
-  handler: Handler;
-  constructor(handler: Handler) {
+export class Node<H> {
+  next: Node<H> | null = null;
+  handler: H;
+  constructor(handler: H) {
     this.handler = handler;
   }
 }
 
-export class LinkedList {
+export class LinkedList<H> {
   method: string;
   pathname: string;
   regexp: RegExp;
-  head: Node | null = null;
-  tail: Node | null = null;
-  constructor(method: string, pathname: string, ...handlers: Handler[]) {
+  head: Node<H> | null = null;
+  tail: Node<H> | null = null;
+  constructor(method: string, pathname: string, ...handlers: H[]) {
     this.method = method;
     this.pathname = pathname;
     this.regexp = pathToRegexp(pathname);
     this.prepend(...handlers);
   }
-  append(...handlers: Handler[]) {
+  append(...handlers: H[]) {
     for (const handler of handlers) {
       const knot = new Node(handler);
       if (this.head === null) {
@@ -33,7 +32,7 @@ export class LinkedList {
     }
   }
 
-  prepend(...handlers: Handler[]) {
+  prepend(...handlers: H[]) {
     for (const handler of handlers.reverse()) {
       const knot = new Node(handler);
       if (this.head === null) {
