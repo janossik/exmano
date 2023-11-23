@@ -2,6 +2,14 @@ import exmano, { Router } from 'exmano';
 
 const app = exmano();
 
+const router0 = new Router();
+
+router0.get("/test",(req,res)=>{
+  res.json({test:"test"})
+})
+
+app.use(router0);
+
 const router1 = new Router('/1');
 const router2 = new Router('/3');
 const router3 = new Router('/3');
@@ -11,6 +19,7 @@ router2.post('/4', (request, response) => {
 });
 router3.post('/', (request, response) => {
   response.send('router3 POST /1/2/3');
+
 });
 
 router1.use('/2', router2);
@@ -25,6 +34,25 @@ app.use(router1);
 app.get('/', (request, response) => {
   response.send('Hello World');
 });
+
+app.ws(
+  '/test/:id',
+  (ws, req, next) => {
+    ws.send('test');
+    next();
+  },
+  (ws, req, next) => {
+    ws.send('test');
+    next();
+  },
+  (ws, _req, _next) => {
+    ws.on('message', (message) => {
+      console.log(message.toString());
+    });
+
+    ws.send('test2');
+  },
+);
 
 app.listen(3000, () => {
   console.log(`Server is running on http://localhost:3000`);
