@@ -1,4 +1,4 @@
-GET http://localhost:3000/
+GET http://localhost:3000/test
 Accept: application/json
 
 ###
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ###
-WEBSOCKET ws://localhost:3000/test/1
+WEBSOCKET ws://localhost:3000/zzzz
 Sec-WebSocket-Protocol: json
 
 {

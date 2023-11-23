@@ -36,7 +36,7 @@ export class Router extends EventEmitter {
       const lists = this.routers[key];
       for (const list of lists) {
         list.pathname = preparePathname(pathname, list.pathname);
-        this.checkPath(list.method, preparePathname(this.pathname, list.pathname));
+        this.pathname !== "/" && this.checkPath(list.method, preparePathname(this.pathname, list.pathname));
         list.regexp = pathToRegexp(preparePathname(pathname, list.pathname));
       }
     }
@@ -47,6 +47,7 @@ export class Router extends EventEmitter {
       throw new Error(`Pathname ${pathname} already exists`);
     }
     this._paths.push(`${method}${pathname}`);
+
   }
   request(method: string, pathname: string, ...handlers: Handler[]) {
     if (!this.routers[method]) {
@@ -94,7 +95,7 @@ export class Router extends EventEmitter {
           if (this.routers[key].includes(list)) {
             throw new Error(`The router was already used, ${key}:${list.pathname}`);
           }
-          this.checkPath(list.method, preparePathname(this.pathname, list.pathname));
+           this.checkPath(list.method, preparePathname(this.pathname, list.pathname));
           list.prepend(...this.middlewares);
           this.routers[key] && this.routers[key].push(list);
         }
