@@ -1,9 +1,18 @@
-GET http://localhost:3000/zzz/
+GET http://localhost:3000/test
 Accept: application/json
 
 ###
-POST http://localhost:3000/test/test2/1
+POST http://localhost:3000/1/2/3/4
 Content-Type: application/json
+
+{
+  "name": "test",
+  "age": 2
+}
+
+###
+WEBSOCKET ws://localhost:3000/zzzz
+Sec-WebSocket-Protocol: json
 
 {
   "name": "test",

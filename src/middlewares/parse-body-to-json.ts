@@ -16,6 +16,9 @@ export async function parseBodyToJson(request: Request, response: Response, next
       });
     });
   };
-  await parse();
-  await next();
+  // "await parse();" can block apps if used 2 times
+  parse()
+    .then(() => next())
+    .catch(next)
+    .finally(() => next());
 }
