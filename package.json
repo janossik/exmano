@@ -10,7 +10,7 @@
   "scripts": {
     "predev": "rm -rf examples/node_modules && rm -rf examples/package-lock.json && npm run build && cd ./examples && npm i && cd ..",
     "dev": "nodemon",
-    "build": "tsup --dts",
+    "build": "tsc",
     "prepublish": "npm run build"
   },
   "autors": [
@@ -28,14 +28,13 @@
   "devDependencies": {
     "@types/node": "^20.4.1",
     "@types/ws": "^8.5.5",
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
-    "@typescript-eslint/parser": "^5.61.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.44.0",
     "eslint-plugin-prettier": "^5.0.0-alpha.2",
     "nodemon": "^3.0.1",
     "prettier": "^3.0.0",
     "ts-node": "^10.9.1",
-    "tsup": "^7.1.0",
     "typescript": "^5.1.6"
   },
   "dependencies": {

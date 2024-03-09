@@ -1,11 +1,14 @@
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
+import { Appltication } from './Application';
 
 export class Request<TBody = Record<string, unknown>> extends IncomingMessage {
+  application?: Appltication;
   body: TBody = {} as TBody;
   private _params: Record<string, string> = {};
   method = '';
   private _cookies: Record<string, string> = {};
+
   constructor(args: Socket) {
     super(args);
   }
@@ -13,9 +16,11 @@ export class Request<TBody = Record<string, unknown>> extends IncomingMessage {
   get params() {
     return this._params;
   }
+
   set params(value: Record<string, string>) {
     this._params = value;
   }
+
   set param({ name, value }: { name: string; value: string }) {
     this._params[name] = value;
   }

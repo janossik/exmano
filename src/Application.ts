@@ -6,6 +6,7 @@ import { ApplticationOptions, ErrorHandler } from './types';
 import { defaultErrorHandler } from './utils/default-error-handler';
 import { Server, ServerHttps } from './Server';
 import { Router } from './Router';
+import { HttpError } from './errors/HttpError';
 
 type SomeServer = Server | ServerHttps | http.Server | https.Server;
 type VoidFunction = () => void;
@@ -14,14 +15,14 @@ export class Appltication extends Router {
   readonly server: SomeServer;
   options: ApplticationOptions;
   private _errorHandler: ErrorHandler = defaultErrorHandler;
-  constructor(server?: SomeServer, options: ApplticationOptions = {}) {
+  constructor(options: ApplticationOptions = {}, server?: SomeServer) {
     super();
     this.server =
       server ||
       new Server({
         ServerResponse: Response,
         IncomingMessage: Request,
-      });
+      }, this);
     this.options = options;
     this.init();
   }
@@ -95,7 +96,7 @@ export class Appltication extends Router {
       response.setHeader('X-Powered-By', 'Exmano');
       const lists = this.routers[request.method];
       if (!lists) {
-        const error = new Error(`Method '${request.method}' isn't exist`);
+        const error = new HttpError(`Method '${request.method}' isn't exist`, 404);
         if (!this.options.useErrorHandler) throw error;
         return this._errorHandler(error, request, response);
       }
@@ -122,7 +123,7 @@ export class Appltication extends Router {
         };
         return node && node.handler(request, response, next);
       }
-      const error = new Error(`Method '${request.method}' for path '${request.url}' isn't exist`);
+      const error = new HttpError(`Method '${request.method}' for path '${request.url}' isn't exist`, 404);
       if (!this.options.useErrorHandler) throw error;
       return this._errorHandler(error, request, response);
     });

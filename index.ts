@@ -13,12 +13,12 @@ export * from './src/middlewares/parse-cookies';
 export * from './src/middlewares/parse-body-to-json';
 
 export default function exmano(
-  server?: Server,
   options: ApplticationOptions = {
     useErrorHandler: true,
   },
+  server?: Server,
 ) {
-  const app = new Appltication(server, options);
+  const app = new Appltication(options, server);
   app.use(parseBodyToJson);
   app.use(parseCookies);
   return app;
