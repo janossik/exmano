@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "exmano": "file:../../."
+    "exmano": "file:../.."
   }
 }

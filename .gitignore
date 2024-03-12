@@ -4,3 +4,4 @@ dist
 build
 .idea
 examples/package-lock.json
+examples/**/package-lock.json
