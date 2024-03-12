@@ -1,20 +1,20 @@
 [
-    {
-        "name": "Corvette",
-        "mark": "Chevrolet",
-        "age": 2016,
-        "fuel": "petrol"
-    },
-    {
-        "name": "Golf 3",
-        "mark": "Volkswagen",
-        "age": 2006,
-        "fuel": "diesel"
-    },
-    {
-        "name": "Corolla",
-        "mark": "Toyota",
-        "age": 2016,
-        "fuel": "petrol"
-    }
+  {
+    "name": "Corvette",
+    "mark": "Chevrolet",
+    "age": 2016,
+    "fuel": "petrol"
+  },
+  {
+    "name": "Golf 3",
+    "mark": "Volkswagen",
+    "age": 2006,
+    "fuel": "diesel"
+  },
+  {
+    "name": "Corolla",
+    "mark": "Toyota",
+    "age": 2016,
+    "fuel": "petrol"
+  }
 ]

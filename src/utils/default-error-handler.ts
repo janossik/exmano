@@ -1,5 +1,5 @@
 import { ErrorHandler } from '../types';
-import { HttpError } from '../errors/HttpError'
+import { HttpError } from '../errors/HttpError';
 
 export const defaultErrorHandler: ErrorHandler = async (err, request, response) => {
   if (err instanceof HttpError) {

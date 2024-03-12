@@ -3,12 +3,7 @@
     "module": "CommonJS",
     "target": "ES2015",
     "declaration": true,
-    "lib": [
-      "ES2017",
-      "ES7",
-      "ES6",
-      "ES2021"
-    ],
+    "lib": ["ES2017", "ES7", "ES6", "ES2021"],
     "moduleResolution": "node",
     "outDir": "./lib",
     "rootDir": ".",
@@ -18,15 +13,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
+    "sourceMap": true
   },
-  "include": [
-    "index.ts",
-    "src/**/*",
-    "*.ts"
-  ],
-  "exclude": [
-    "examples/**/*",
-    "**/*.spec.ts"
-  ]
+  "include": ["index.ts", "src/**/*", "*.ts"],
+  "exclude": ["examples/**/*", "**/*.spec.ts"]
 }

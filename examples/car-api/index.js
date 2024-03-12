@@ -5,11 +5,11 @@ const app = exmano();
 const port = 3000;
 
 app.get('/', (req, res) => {
-    res.send('Wlecome in car API');
+  res.send('Wlecome in car API');
 });
 
 app.use(carRouter);
 
 app.listen(port, () => {
-    console.log(`Example app listening on http://localhost${port}`);
+  console.log(`Example app listening on http://localhost${port}`);
 });
