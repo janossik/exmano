@@ -108,20 +108,24 @@ export class Appltication extends Router {
         }
 
         let node = list.head;
-        const next = async (err?: unknown) => {
+        const appThis = this;
+
+        const next = async function (err?: unknown) {
           if (err) {
-            if (!this.options.useErrorHandler) throw err;
-            return await this._errorHandler(err, request, response);
+            if (!appThis.options.useErrorHandler) throw err;
+            return await appThis._errorHandler(err, request, response);
           }
           try {
             node = node?.next || null;
-            node?.handler(request, response, next);
+            node?.handler.call(appThis, request, response, next);
+
           } catch (err) {
-            if (!this.options.useErrorHandler) throw err;
-            return await this._errorHandler(err, request, response);
+            if (!appThis.options.useErrorHandler) throw err;
+            return await appThis._errorHandler(err, request, response);
           }
-        };
-        return node && node.handler(request, response, next);
+        }
+
+        return node && node.handler.call(appThis, request, response, next);
       }
       const error = new HttpError(`Method '${request.method}' for path '${request.url}' isn't exist`, 404);
       if (!this.options.useErrorHandler) throw error;

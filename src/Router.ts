@@ -4,6 +4,7 @@ import { preparePathname } from './utils/prepare-pathname';
 import { pathToRegexp } from 'path-to-regexp';
 import { LinkedList } from './LinkedList';
 import { WebSocketServer } from 'ws';
+import { Appltication } from './Application';
 
 export class Router extends EventEmitter {
   readonly webSocketMiddlewares: WebSocketHandler[] = [];
@@ -21,8 +22,8 @@ export class Router extends EventEmitter {
   }
 
   private _pathname: string;
-  readonly middlewares: Handler[] = [];
-  readonly routers: Record<string, LinkedList<Handler>[]> = {};
+  readonly middlewares: Handler<Appltication>[] = [];
+  readonly routers: Record<string, LinkedList<Handler<Appltication>>[]> = {};
   private _paths: string[] = [];
   constructor(pathname = '/') {
     super();
@@ -49,9 +50,9 @@ export class Router extends EventEmitter {
     this._paths.push(`${method}${pathname}`);
 
   }
-  request(method: string, pathname: string, ...handlers: Handler[]) {
+  request(method: string, pathname: string, ...handlers: Handler<Appltication>[]) {
     if (!this.routers[method]) {
-      this.routers[method] = [] as LinkedList<Handler>[];
+      this.routers[method] = [] as LinkedList<Handler<Appltication>>[];
     }
     const currentPathname = preparePathname(this.pathname, pathname);
     this.checkPath(method, currentPathname);
@@ -61,24 +62,24 @@ export class Router extends EventEmitter {
     this.routers[method].push(linkedList);
     return this;
   }
-  get(pathname: string, ...handlers: Handler[]) {
+  get(pathname: string, ...handlers: Handler<Appltication>[]) {
     return this.request('GET', pathname, ...handlers);
   }
-  post(pathname: string, ...handlers: Handler[]) {
+  post(pathname: string, ...handlers: Handler<Appltication>[]) {
     return this.request('POST', pathname, ...handlers);
   }
-  put(pathname: string, ...handlers: Handler[]) {
+  put(pathname: string, ...handlers: Handler<Appltication>[]) {
     return this.request('PUT', pathname, ...handlers);
   }
-  delete(pathname: string, ...handlers: Handler[]) {
+  delete(pathname: string, ...handlers: Handler<Appltication>[]) {
     return this.request('DELETE', pathname, ...handlers);
   }
 
   use(pathname: string, router: Router): this;
   use(router: Router): this;
-  use(...middleware: Handler[]): this;
+  use(...middleware: Handler<Appltication>[]): this;
   use(isWs: '[WS]', ...middleware: WebSocketHandler[]): this;
-  use(arg1: string | Router | Handler, arg2?: Router | Handler | WebSocketHandler, ...args: (Handler | WebSocketHandler)[]) {
+  use(arg1: string | Router | Handler<Appltication>, arg2?: Router | Handler<Appltication> | WebSocketHandler, ...args: (Handler<Appltication> | WebSocketHandler)[]) {
     if (arg1 === '[WS]') {
       this.webSocketMiddlewares.push(arg2 as WebSocketHandler, ...(args as WebSocketHandler[]));
       return this;
@@ -95,7 +96,7 @@ export class Router extends EventEmitter {
           if (this.routers[key].includes(list)) {
             throw new Error(`The router was already used, ${key}:${list.pathname}`);
           }
-           this.checkPath(list.method, preparePathname(this.pathname, list.pathname));
+          this.checkPath(list.method, preparePathname(this.pathname, list.pathname));
           list.prepend(...this.middlewares);
           this.routers[key] && this.routers[key].push(list);
         }
@@ -142,7 +143,7 @@ export class Router extends EventEmitter {
     if (arg2 instanceof Router) {
       throw new TypeError('The first argument must be a string');
     }
-    this.middlewares.push(...([arg1, arg2, ...args].filter(Boolean) as Handler[]));
+    this.middlewares.push(...([arg1, arg2, ...args].filter(Boolean) as Handler<Appltication>[]));
     return this;
   }
 }
