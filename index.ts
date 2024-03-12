@@ -1,4 +1,4 @@
-import { Appltication } from './src/Application';
+import { Application } from './src/Application';
 import { Server } from './src/Server';
 import { parseBodyToJson } from './src/middlewares/parse-body-to-json';
 import { parseCookies } from './src/middlewares/parse-cookies';
@@ -18,17 +18,18 @@ function exmano(
   },
   server?: Server,
 ) {
-  const app = new Appltication(options, server);
+  const app = new Application(options, server);
   app.use(parseBodyToJson);
   app.use(parseCookies);
   return app;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 namespace exmano {
   export const Server = ServerModule.Server;
   export const ServerHttp = ServerModule.ServerHttp;
   export const ServerHttps = ServerModule.ServerHttps;
-  export const Application = ApplicationModule.Appltication;
+  export const Application = ApplicationModule.Application;
   export const Request = RequestModule.Request;
   export const Response = ResponseModule.Response;
   export const Router = RouterModule.Router;

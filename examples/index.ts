@@ -2,19 +2,17 @@ import exmano, { Router } from 'exmano';
 
 const app = exmano();
 
-
 app.get('/', async (request, response) => {
   //throw new Error("Nie działa");
 
   response.send('Hello World');
 });
 
-
 const router0 = new Router();
 
-router0.get("/test", (req, res) => {
-  res.json({ test: "test" })
-})
+router0.get('/test', (req, res) => {
+  res.json({ test: 'test' });
+});
 
 app.use(router0);
 
@@ -27,7 +25,6 @@ router2.post('/4', (request, response) => {
 });
 router3.post('/', (request, response) => {
   response.send('router3 POST /1/2/3');
-
 });
 
 router1.use('/2', router2);
@@ -41,7 +38,7 @@ app.use(router1);
 
 app.ws(
   '/test/:id',
-  (ws, req, next) => {
+  function (ws, req, next) {
     ws.send('test');
     next();
   },
@@ -58,9 +55,8 @@ app.ws(
   },
 );
 
-
 app.use((req, res) => {
-  res.send("Co jest?")
+  res.send('Co jest?');
 });
 
 app.listen(3000, () => {

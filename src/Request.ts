@@ -1,9 +1,9 @@
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
-import { Appltication } from './Application';
+import { Application } from './Application';
 
 export class Request<TBody = Record<string, unknown>> extends IncomingMessage {
-  application?: Appltication;
+  application?: Application;
   body: TBody = {} as TBody;
   private _params: Record<string, string> = {};
   method = '';

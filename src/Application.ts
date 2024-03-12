@@ -11,7 +11,7 @@ import { HttpError } from './errors/HttpError';
 type SomeServer = Server | ServerHttps | http.Server | https.Server;
 type VoidFunction = () => void;
 
-export class Appltication extends Router {
+export class Application extends Router {
   readonly server: SomeServer;
   options: ApplticationOptions;
   private _errorHandler: ErrorHandler = defaultErrorHandler;
@@ -19,10 +19,13 @@ export class Appltication extends Router {
     super();
     this.server =
       server ||
-      new Server({
-        ServerResponse: Response,
-        IncomingMessage: Request,
-      }, this);
+      new Server(
+        {
+          ServerResponse: Response,
+          IncomingMessage: Request,
+        },
+        this,
+      );
     this.options = options;
     this.init();
   }
@@ -47,30 +50,34 @@ export class Appltication extends Router {
   private connections() {
     for (const list of this.webSockets) {
       if (!list?.webSocketServer) continue;
+      list.webSocketServer.on('connection', async (webSocket, incomingMessage) => {
+        console.log(list);
 
-      list.webSocketServer.on('connection', (webSocket, incomingMessage) => {
         let node = list.head;
         const next = async (err?: unknown) => {
           if (err) {
-            if (!this.options.useErrorHandler) throw err;
-            //  return await this._errorHandler(err, request, response);
+            webSocket.send(JSON.stringify(err));
+            return webSocket.terminate();
           }
           try {
             node = node?.next || null;
-            node?.handler(webSocket, { incomingMessage }, next);
+            await node?.handler.call(this, webSocket, { incomingMessage }, next);
           } catch (err) {
-            if (!this.options.useErrorHandler) throw err;
-            //return await this._errorHandler(err, request, response);
+            webSocket.send(JSON.stringify(err));
+            return webSocket.terminate();
           }
         };
-        return node && node?.handler(webSocket, { incomingMessage }, next);
+        return node && (await node?.handler.call(this, webSocket, { incomingMessage }, next));
       });
     }
   }
 
   private upgrade() {
     this.server.on('upgrade', (request, socket, head) => {
-      if (!request.url) throw new Error('URL not found');
+      if (!request.url) {
+        socket.destroy();
+        throw new Error('URL not found');
+      }
 
       for (const { webSocketServer: server, regexp } of this.webSockets) {
         if (!server) continue;
@@ -108,27 +115,25 @@ export class Appltication extends Router {
         }
 
         let node = list.head;
-        const appThis = this;
 
-        const next = async function (err?: unknown) {
+        const next = async (err?: unknown) => {
           if (err) {
-            if (!appThis.options.useErrorHandler) throw err;
-            return await appThis._errorHandler(err, request, response);
+            if (!this.options.useErrorHandler) throw err;
+            return await this._errorHandler(err, request, response);
           }
           try {
             node = node?.next || null;
-            await node?.handler.call(appThis, request, response, next);
-
+            await node?.handler.call(this, request, response, next);
           } catch (err) {
-            if (!appThis.options.useErrorHandler) throw err;
-            return await appThis._errorHandler(err, request, response);
+            if (!this.options.useErrorHandler) throw err;
+            return await this._errorHandler(err, request, response);
           }
-        }
+        };
         try {
-          return node && await node.handler.call(appThis, request, response, next);
+          return node && (await node.handler.call(this, request, response, next));
         } catch (err) {
-          if (!appThis.options.useErrorHandler) throw err;
-          return await appThis._errorHandler(err, request, response);
+          if (!this.options.useErrorHandler) throw err;
+          return await this._errorHandler(err, request, response);
         }
       }
       const error = new HttpError(`Method '${request.method}' for path '${request.url}' isn't exist`, 404);
@@ -139,6 +144,6 @@ export class Appltication extends Router {
   private init() {
     this.serverEventToApplicationEvent();
     this.requestApplicationListener();
-    this.webSockets.length && this.upgrade();
+    this.upgrade();
   }
 }
