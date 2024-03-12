@@ -3,16 +3,16 @@ import { Server } from './src/Server';
 import { parseBodyToJson } from './src/middlewares/parse-body-to-json';
 import { parseCookies } from './src/middlewares/parse-cookies';
 import { ApplticationOptions } from './src/types';
+import * as ServerModule from './src/Server';
+import * as ApplicationModule from './src/Application';
+import * as RequestModule from './src/Request';
+import * as ResponseModule from './src/Response';
+import * as RouterModule from './src/Router';
+import * as CookieParserModule from './src/middlewares/parse-cookies';
+import * as BodyParserModule from './src/middlewares/parse-body-to-json';
+import * as HttpErrorModule from './src/errors/HttpError';
 
-export * from './src/Server';
-export * from './src/Application';
-export * from './src/Request';
-export * from './src/Response';
-export * from './src/Router';
-export * from './src/middlewares/parse-cookies';
-export * from './src/middlewares/parse-body-to-json';
-
-export default function exmano(
+function exmano(
   options: ApplticationOptions = {
     useErrorHandler: true,
   },
@@ -23,3 +23,18 @@ export default function exmano(
   app.use(parseCookies);
   return app;
 }
+
+namespace exmano {
+  export const Server = ServerModule.Server;
+  export const ServerHttp = ServerModule.ServerHttp;
+  export const ServerHttps = ServerModule.ServerHttps;
+  export const Application = ApplicationModule.Appltication;
+  export const Request = RequestModule.Request;
+  export const Response = ResponseModule.Response;
+  export const Router = RouterModule.Router;
+  export const parseCookies = CookieParserModule.parseCookies;
+  export const parseBodyToJson = BodyParserModule.parseBodyToJson;
+  export const HttpError = HttpErrorModule.HttpError;
+}
+
+export = exmano;

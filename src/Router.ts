@@ -58,8 +58,10 @@ export class Router extends EventEmitter {
     this.checkPath(method, currentPathname);
     const linkedList = new LinkedList(method, currentPathname, ...handlers);
     linkedList.prepend(...this.middlewares);
+
     linkedList.regexp = pathToRegexp(preparePathname(this.pathname, pathname));
     this.routers[method].push(linkedList);
+
     return this;
   }
   get(pathname: string, ...handlers: Handler<Appltication>[]) {

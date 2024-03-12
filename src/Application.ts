@@ -117,15 +117,19 @@ export class Appltication extends Router {
           }
           try {
             node = node?.next || null;
-            node?.handler.call(appThis, request, response, next);
+            await node?.handler.call(appThis, request, response, next);
 
           } catch (err) {
             if (!appThis.options.useErrorHandler) throw err;
             return await appThis._errorHandler(err, request, response);
           }
         }
-
-        return node && node.handler.call(appThis, request, response, next);
+        try {
+          return node && await node.handler.call(appThis, request, response, next);
+        } catch (err) {
+          if (!appThis.options.useErrorHandler) throw err;
+          return await appThis._errorHandler(err, request, response);
+        }
       }
       const error = new HttpError(`Method '${request.method}' for path '${request.url}' isn't exist`, 404);
       if (!this.options.useErrorHandler) throw error;
@@ -135,6 +139,6 @@ export class Appltication extends Router {
   private init() {
     this.serverEventToApplicationEvent();
     this.requestApplicationListener();
-    this.upgrade();
+    this.webSockets.length && this.upgrade();
   }
 }

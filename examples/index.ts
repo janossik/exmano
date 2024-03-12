@@ -2,10 +2,18 @@ import exmano, { Router } from 'exmano';
 
 const app = exmano();
 
+
+app.get('/', async (request, response) => {
+  //throw new Error("Nie działa");
+
+  response.send('Hello World');
+});
+
+
 const router0 = new Router();
 
-router0.get("/test",(req,res)=>{
-  res.json({test:"test"})
+router0.get("/test", (req, res) => {
+  res.json({ test: "test" })
 })
 
 app.use(router0);
@@ -31,10 +39,6 @@ app.get('/1/2/3/4', (request, response) => {
 
 app.use(router1);
 
-app.get('/', (request, response) => {
-  response.send('Hello World');
-});
-
 app.ws(
   '/test/:id',
   (ws, req, next) => {
@@ -53,6 +57,11 @@ app.ws(
     ws.send('test2');
   },
 );
+
+
+app.use((req, res) => {
+  res.send("Co jest?")
+});
 
 app.listen(3000, () => {
   console.log(`Server is running on http://localhost:3000`);
